@@ -47,17 +47,22 @@ type Path struct {
 
 
 type Schema struct {
-
+  Name            string                          `json:"name"`
+  Properties      []map[string]map[string]string  `json:"properties"`
 }
 
 
 type Body struct {
-
+  Name            string                  `json:"name"`
+  Content         []map[string]*Schema    `json:"content"`
 }
 
-
+//need to implement oauth2 and bearer token instead of qs key
 type Security struct {
-  Name            string              `jso`
+  Name            string    `json:"name"`
+  Type            string    `json:"type"`
+  Scopes          []string  `json:"scopes"`
+  Key             string    `json:"key"`
 }
 
 
@@ -75,7 +80,7 @@ func readSpec(path string) {
   check(err)
 
   in := []byte(dat)
-  spec := map[string][]string{}
+  var spec map[string]interface{}
 
   check(json.Unmarshal(in, &spec))
   fmt.Println(spec)
