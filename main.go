@@ -6,6 +6,7 @@ import (
   "io/ioutil"
   "encoding/json"
   "github.com/mitchellh/mapstructure"
+  "github.com/gorilla/mux"
 )
 
 
@@ -76,7 +77,7 @@ func check(e error) {
 
 
 //this should be pretty obvious
-func readSpec(path string) {
+func readSpec(path string) (Info, []Server, []Tag, []Path) {
   dat, err := ioutil.ReadFile(path)
   check(err)
 
@@ -90,6 +91,7 @@ func readSpec(path string) {
   check(json.Unmarshal(in, &spec))
 
   mapstructure.Decode(spec["info"], &info)
+  fmt.Println("map:", spec)
 
   for i, item := range spec["servers"] {
     var server Server
@@ -109,7 +111,9 @@ func readSpec(path string) {
     paths = append(paths, path)
   }
 
-  var ret_spec map[string]interface{}
+  var ret_spec map[string][]interface{}
+
+  return info, servers, tags, paths
 }
 
 //returns the request headers of the client
@@ -121,15 +125,15 @@ func testConnection(w http.ResponseWriter, req *http.Request) {
   }
 }
 
-//http server as func so it can be invoked as goroutine
-func httpWorker() {
-  http.HandleFunc("/test", testConnection)
-  http.ListenAndServe(":8000", nil)
+func serverInfo(i Info, w http.ResponseWriter, req *http.Request) {
+  w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(i)
 }
 
 //calls main worker
 func main() {
-  readSpec("openapi.json")
-//  httpWorker()
+  i, s, t, p := readSpec("openapi.json")
+  r := mux.NewRouter()
+  r.HandleFunc("/api/{label}/{id}", testConnection)
 
 }

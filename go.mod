@@ -2,4 +2,7 @@ module goas
 
 go 1.14
 
-require github.com/mitchellh/mapstructure v1.3.0 // indirect
+require (
+	github.com/gorilla/mux v1.7.4 // indirect
+	github.com/mitchellh/mapstructure v1.3.0
+)
