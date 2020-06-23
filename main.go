@@ -5,6 +5,7 @@ import (
   "net/http"
   "io/ioutil"
   "encoding/json"
+  "github.com/mitchellh/mapstructure"
 )
 
 
@@ -81,9 +82,34 @@ func readSpec(path string) {
 
   in := []byte(dat)
   var spec map[string]interface{}
+  var info Info
+  var servers []Server
+  var tags []Tag
+  var paths []Path
 
   check(json.Unmarshal(in, &spec))
-  fmt.Println(spec)
+
+  mapstructure.Decode(spec["info"], &info)
+
+  for i, item := range spec["servers"] {
+    var server Server
+    mapstructure.Decode(item, &server)
+    servers = append(servers, server)
+  }
+
+  for i, item := range spec["tags"] {
+    var tag Tag
+    mapstructure.Decode(item, &tag)
+    tags = append(tags, tag)
+  }
+
+  for i, item := range spec["paths"] {
+    var path Path
+    mapstructure.Decode(item, &path)
+    paths = append(paths, path)
+  }
+
+  var ret_spec map[string]interface{}
 }
 
 //returns the request headers of the client
