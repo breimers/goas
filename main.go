@@ -46,11 +46,11 @@ type Path struct {
   Route            string                   `json:"route"`
   Method           string                   `json:"method"`
   HandlerFunc      http.HandlerFunc         `json:"handler"`
-  Tags             []*Tag                   `json:"tags"`
+  Tags             []Tag                   `json:"tags"`
   Summary          string                   `json:"summary"`
   Responses        map[int]string           `json:"responses"`
   Security         []map[string][]string    `json:"security"`
-  RequestBody      *Body                    `json:"responses"`
+  RequestBody      Body                    `json:"responses"`
 }
 
 
@@ -62,7 +62,7 @@ type Schema struct {
 
 type Body struct {
   Name            string                  `json:"name"`
-  Content         []map[string]*Schema    `json:"content"`
+  Content         []map[string]Schema    `json:"content"`
 }
 
 //need to implement oauth2 and bearer token instead of qs key
@@ -74,19 +74,19 @@ type Security struct {
 }
 
 type Components struct {
-  Schemas         []*Schema   `json:"schemas"`
-  RequestBodies   []*Body     `json:"requestBodies"`
-  SecuritySchemes []*Security `json:"securitySchemes"`
+  Schemas         []Schema   `json:"schemas"`
+  RequestBodies   []Body     `json:"requestBodies"`
+  SecuritySchemes []Security `json:"securitySchemes"`
 }
 
 type Swagger struct {
   OpenAPI         string        `json:"openapi"`
-  Info            *Info         `json:"info"`
-  ExternalDocs    *ExternalDocs `json:"externaldocs"`
-  Servers         []*Server     `json:"servers"`
-  Tags            []*Tag        `json:"tags"`
-  Paths           []*Path       `json:"paths"`
-  Components      *Components   `json:"components"`
+  Info            Info         `json:"info"`
+  ExternalDocs    ExternalDocs `json:"externaldocs"`
+  Servers         []Server     `json:"servers"`
+  Tags            []Tag        `json:"tags"`
+  Paths           []Path       `json:"paths"`
+  Components      Components   `json:"components"`
 
 }
 
