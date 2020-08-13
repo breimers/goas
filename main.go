@@ -4,8 +4,8 @@ import (
   "fmt"
   "net/http"
   "io/ioutil"
+  "os"
   "encoding/json"
-  "github.com/mitchellh/mapstructure"
   "github.com/gorilla/mux"
 )
 
@@ -24,6 +24,12 @@ type Info struct {
 
 
 type Server struct {
+  Url             string    `json:"url"`
+  Description     string    `json:"description"`
+}
+
+
+type ExternalDocs struct {
   Url             string    `json:"url"`
   Description     string    `json:"description"`
 }
@@ -67,6 +73,22 @@ type Security struct {
   Key             string    `json:"key"`
 }
 
+type Components struct {
+  Schemas         []*Schema   `json:"schemas"`
+  RequestBodies   []*Body     `json:"requestBodies"`
+  SecuritySchemes []*Security `json:"securitySchemes"`
+}
+
+type Swagger struct {
+  OpenAPI         string        `json:"openapi"`
+  Info            *Info         `json:"info"`
+  ExternalDocs    *ExternalDocs `json:"externaldocs"`
+  Servers         []*Server     `json:"servers"`
+  Tags            []*Tag        `json:"tags"`
+  Paths           []*Path       `json:"paths"`
+  Components      *Components   `json:"components"`
+
+}
 
 //simply panics on error
 func check(e error) {
@@ -77,43 +99,41 @@ func check(e error) {
 
 
 //this should be pretty obvious
-func readSpec(path string) (Info, []Server, []Tag, []Path) {
-  dat, err := ioutil.ReadFile(path)
+func readSpec(path string) (Swagger) {
+
+  // Open our jsonFile
+  jsonFile, err := os.Open("openapi.json")
+  // if we os.Open returns an error then handle it
   check(err)
+  defer jsonFile.Close()
+  byteValue, _ := ioutil.ReadAll(jsonFile)
 
-  in := []byte(dat)
-  var spec map[string]interface{}
-  var info Info
-  var servers []Server
-  var tags []Tag
-  var paths []Path
+  var swagger Swagger
 
-  check(json.Unmarshal(in, &spec))
+  json.Unmarshal([]byte(byteValue), &swagger)
 
-  mapstructure.Decode(spec["info"], &info)
-  fmt.Println("map:", spec)
-
-  for i, item := range spec["servers"] {
-    var server Server
-    mapstructure.Decode(item, &server)
-    servers = append(servers, server)
-  }
-
-  for i, item := range spec["tags"] {
-    var tag Tag
-    mapstructure.Decode(item, &tag)
-    tags = append(tags, tag)
-  }
-
-  for i, item := range spec["paths"] {
-    var path Path
-    mapstructure.Decode(item, &path)
-    paths = append(paths, path)
-  }
-
-  var ret_spec map[string][]interface{}
-
-  return info, servers, tags, paths
+  //
+  // for item := range spec["servers"] {
+  //   var server Server
+  //   check(json.Unmarshal([]byte(item), &server))
+  //   servers = append(servers, server)
+  // }
+  //
+  // for item := range spec["tags"] {
+  //   var tag Tag
+  //   check(json.Unmarshal([]byte(item), &tag))
+  //   tags = append(tags, tag)
+  // }
+  //
+  // for item := range spec["paths"] {
+  //   var path Path
+  //   check(json.Unmarshal([]byte(item), &path))
+  //   paths = append(paths, path)
+  // }
+  //
+  // // var ret_spec map[string][]interface{}
+  //
+  return swagger
 }
 
 //returns the request headers of the client
@@ -132,7 +152,8 @@ func serverInfo(i Info, w http.ResponseWriter, req *http.Request) {
 
 //calls main worker
 func main() {
-  i, s, t, p := readSpec("openapi.json")
+  swagger := readSpec("openapi.json")
+  fmt.Println(swagger)
   r := mux.NewRouter()
   r.HandleFunc("/api/{label}/{id}", testConnection)
 
