@@ -42,15 +42,20 @@ type Tag struct {
 }
 
 
+type Route struct {
+  Method          string                  `json:"method"`
+  Tags            []Tag                   `json:"tags"`
+  Summary         string                  `json:"summary"`
+  OperationID     string                  `json:"operationId"`
+  RequestBody     Body                    `json:"responses"`
+  Responses       map[int]string          `json:"responses"`
+  Security        []map[string][]string    `json:"security"`
+}
+
+
 type Path struct {
-  Route            string                   `json:"route"`
-  Method           string                   `json:"method"`
-  HandlerFunc      http.HandlerFunc         `json:"handler"`
-  Tags             []Tag                   `json:"tags"`
-  Summary          string                   `json:"summary"`
-  Responses        map[int]string           `json:"responses"`
-  Security         []map[string][]string    `json:"security"`
-  RequestBody      Body                    `json:"responses"`
+  Path             string                   `json:"route"`
+  Routes           map[string]Route         `json:"route"`
 }
 
 
@@ -85,7 +90,7 @@ type Swagger struct {
   ExternalDocs    ExternalDocs `json:"externaldocs"`
   Servers         []Server     `json:"servers"`
   Tags            []Tag        `json:"tags"`
-  Paths           []Path       `json:"paths"`
+  Paths           map[string]Path `json:"paths"`
   Components      Components   `json:"components"`
 
 }
